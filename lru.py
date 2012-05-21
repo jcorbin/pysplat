@@ -21,3 +21,46 @@ class LRUOrderedDict(OrderedDict):
             oldest_key = self._OrderedDict__root[NEXT][KEY]
             del self[oldest_key]
         setitem(self, key, value)
+
+import errno
+import fcntl
+import resource
+
+def get_nofile_avail():
+    nofile = n = resource.getrlimit(resource.RLIMIT_NOFILE)[0]
+    for fd in range(0, nofile):
+        try:
+            fcntl.fcntl(fd, fcntl.F_GETFD)
+            n -= 1
+        except IOError as err:
+            if err.errno != errno.EBADF:
+                raise err
+    return n
+
+class LRUFileCache(LRUOrderedDict):
+    def __init__(self, *args, **kwds):
+        if '_maxsize' not in kwds:
+            kwds['_maxsize'] = get_nofile_avail()-1
+        self.opener = kwds.pop('_opener', lambda path: open(path, 'a'))
+        super(LRUFileCache, self).__init__(*args, **kwds)
+
+    def use(self, key, loduse=LRUOrderedDict.use):
+        try:
+            return loduse(self, key)
+        except KeyError:
+            self[key] = fp = self.opener(key)
+            return fp
+
+    def __delitem__(self, key, delitem=OrderedDict.__delitem__):
+        fp = self[key]
+        delitem(self, key)
+        fp.close()
+
+    def clear(self):
+        for fp in dict.itervalues(self):
+            fp.close()
+        OrderedDict.clear(self)
+
+    def __del__(self):
+        for fp in dict.itervalues(self):
+            fp.close()
