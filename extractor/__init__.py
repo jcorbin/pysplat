@@ -28,3 +28,6 @@ class ExtractorPipe(object):
         RegexExtractor.parse_expression,
         delim='|')
     parse_expression.setParseAction(lambda toks: ExtractorPipe(toks))
+
+def parse(string):
+    return ExtractorPipe.parse_expression.parseString(string)
