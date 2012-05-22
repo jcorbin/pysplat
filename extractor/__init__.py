@@ -20,6 +20,7 @@ class ExtractorPipe(object):
     def __call__(self, s):
         for extractor in self.extractors:
             s = extractor(s)
+            if s is None: return None
         return s
 
     parse_expression = delimitedList(
