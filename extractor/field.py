@@ -73,10 +73,15 @@ class FieldExtractor(object):
 
     parse_expression = (
         Suppress('[') + delimitedList(FieldTerm)('indices') + Suppress(']')
+        | FieldTerm('index')
     ) + Optional(FieldSep)('separator')
 
     @parse_expression.setParseAction
     def parse_expression(toks):
         sep = toks.get('separator', default_regex)
-        return FieldExtractor(toks['indices'], sep)
+        try:
+            indices = toks['indices']
+        except KeyError:
+            indices = (toks['index'],)
+        return FieldExtractor(indices, sep)
 
