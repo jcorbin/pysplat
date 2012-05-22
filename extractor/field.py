@@ -27,6 +27,8 @@ FieldSepStr.setParseAction(lambda toks: re.compile(re.escape(toks[0])))
 
 FieldSep = LiteralRegex | FieldSepStr
 
+FieldTerm = FieldRange_open_left | FieldRange | FieldRange_open_right | Field
+
 def build_getter(index):
     if isinstance(index, int):
         start = end = index
@@ -69,9 +71,9 @@ class FieldExtractor(object):
         if value != self.noneval:
             return value
 
-    parse_expression = Suppress('[') + delimitedList(
-        FieldRange_open_left | FieldRange | FieldRange_open_right | Field
-    )('indices') + Suppress(']') + Optional(FieldSep)('separator')
+    parse_expression = (
+        Suppress('[') + delimitedList(FieldTerm)('indices') + Suppress(']')
+    ) + Optional(FieldSep)('separator')
 
     @parse_expression.setParseAction
     def parse_expression(toks):
