@@ -47,6 +47,7 @@ class FieldExtractor(object):
         self.regex = regex
         self.indices = tuple(indices)
         self.getters = tuple(build_getter(i) for i in self.indices)
+        self.noneval = tuple(None for i in self.indices)
 
     def __repr__(self):
         return '%s(%r, re.compile(%r, %d))' % (self.__class__.__name__,
@@ -64,8 +65,9 @@ class FieldExtractor(object):
                 yield None
 
     def __call__(self, s):
-        return strtuple('' if v is None else v
-            for v in self.extract(s))
+        value = strtuple(self.extract(s))
+        if value != self.noneval:
+            return value
 
     parse_expression = Suppress('[') + delimitedList(
         FieldRange_open_left | FieldRange | FieldRange_open_right | Field
