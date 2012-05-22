@@ -53,6 +53,8 @@ class FieldExtractor(object):
             self.indices, self.regex.pattern, self.regex.flags)
 
     def extract(self, s):
+        if not isinstance(s, basestring):
+            s = str(s)
         seps = tuple(match.span()
             for match in self.regex.finditer(s))
         for getter in self.getters:
