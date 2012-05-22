@@ -26,6 +26,7 @@ def open_splat_file(key):
         fp = open(path, 'a')
     except IOError as err:
         if err.errno != errno.ENOENT: raise err
+        if '/' not in path: raise err
         os.makedirs(os.path.dirname(path))
         fp = open(path, 'a')
     return fp
