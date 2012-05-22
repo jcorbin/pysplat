@@ -1,0 +1,67 @@
+#!/usr/bin/env pypy
+
+import errno
+import os
+import sys
+from collections import OrderedDict
+from optparse import OptionParser
+from pyparsing import ParseException
+
+import extractor
+from extractor.compound import FlatCompoundExtractor
+from lru import LRUFileCache
+
+parser = OptionParser()
+parser.set_defaults(
+    output_separator='\n',
+    nonefile='__default__')
+parser.add_option('-v', '--verbose',
+    dest='verbose', action='store_true', default=True)
+opts, extractors = parser.parse_args()
+
+def open_splat_file(key):
+    path = (opts.nonefile if v is None else str(v) for v in key)
+    path = os.path.join(*path)
+    try:
+        fp = open(path, 'a')
+    except IOError as err:
+        if err.errno != errno.ENOENT: raise err
+        os.makedirs(os.path.dirname(path))
+        fp = open(path, 'a')
+    return fp
+
+try:
+    ext = FlatCompoundExtractor(extractor.parse(spec)[0]
+        for spec in extractors)
+
+except ParseException as exc:
+    print >>sys.stderr, "Invalid extractor:", exc
+    print >>sys.stderr, exc.markInputline()
+    sys.exit(1)
+
+records = (line.rstrip('\r\n') for line in sys.stdin)
+
+if opts.verbose:
+    counts = OrderedDict()
+    paths = []
+
+fmt = '%s' + opts.output_separator
+with LRUFileCache(_opener=open_splat_file) as files:
+    for record in records:
+        key = ext(record)
+        fp = files.use(key)
+        fp.write(fmt % record)
+        if opts.verbose:
+            try:
+                counts[key] += 1
+            except KeyError:
+                counts[key] = 1
+                paths.append(fp.name)
+
+if opts.verbose:
+    counts = counts.values()
+    fmt = '  %% %dd %%s' % len(str(max(counts)))
+    for count_path in zip(counts, paths):
+        print fmt % count_path
+
+# vim:set ft=python ts=4 sw=4 et:
