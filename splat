@@ -1,6 +1,7 @@
 #!/usr/bin/env pypy
 
 import errno
+import fileinput
 import os
 import sys
 from collections import OrderedDict
@@ -19,7 +20,7 @@ parser.add_option('-v', '--verbose',
     dest='verbose', action='store_true', default=True)
 parser.add_option('-x', '--extract',
     dest='extract', action='append', default=[])
-opts, args = parser.parse_args()
+opts, files = parser.parse_args()
 
 def open_splat_file(key):
     path = (opts.nonefile if v is None else str(v) for v in key)
@@ -42,7 +43,11 @@ except ParseException as exc:
     print >>sys.stderr, exc.markInputline()
     sys.exit(1)
 
-records = (line.rstrip('\r\n') for line in sys.stdin)
+finput = fileinput.FileInput(
+    files=files,
+    openhook=fileinput.hook_compressed)
+
+records = (line.rstrip('\r\n') for line in finput)
 
 if opts.verbose:
     counts = OrderedDict()
