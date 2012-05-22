@@ -38,7 +38,7 @@ def build_getter(index):
     if start is None or start == 0:
         return lambda s, seps: s[0:seps[end][0]]
     elif end is None:
-        return lambda s, seps: s[seps[start-1][1]:-1]
+        return lambda s, seps: s[seps[start-1][1]:None]
     else:
         return lambda s, seps: s[seps[start-1][1]:seps[end][0]]
 
