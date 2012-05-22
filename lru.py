@@ -38,9 +38,13 @@ def get_nofile_avail():
     return n
 
 class LRUFileCache(LRUOrderedDict):
+    _custom_maxsize = False
+
     def __init__(self, *args, **kwds):
         if '_maxsize' not in kwds:
             kwds['_maxsize'] = get_nofile_avail()-1
+        else:
+            self._custom_maxsize = True
         self.opener = kwds.pop('_opener', lambda path: open(path, 'a'))
         super(LRUFileCache, self).__init__(*args, **kwds)
 
@@ -64,3 +68,11 @@ class LRUFileCache(LRUOrderedDict):
     def __del__(self):
         for fp in dict.itervalues(self):
             fp.close()
+
+    def __enter__(self):
+        if not self._custom_maxsize:
+            self._maxsize = get_nofile_avail()-1
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.clear()
