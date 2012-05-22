@@ -17,7 +17,9 @@ parser.set_defaults(
     nonefile='__default__')
 parser.add_option('-v', '--verbose',
     dest='verbose', action='store_true', default=True)
-opts, extractors = parser.parse_args()
+parser.add_option('-x', '--extract',
+    dest='extract', action='append', default=[])
+opts, args = parser.parse_args()
 
 def open_splat_file(key):
     path = (opts.nonefile if v is None else str(v) for v in key)
@@ -33,7 +35,7 @@ def open_splat_file(key):
 
 try:
     ext = FlatCompoundExtractor(extractor.parse(spec)[0]
-        for spec in extractors)
+        for spec in opts.extract)
 
 except ParseException as exc:
     print >>sys.stderr, "Invalid extractor:", exc
