@@ -22,17 +22,19 @@ parser.add_option('-x', '--extract',
     dest='extract', action='append', default=[])
 opts, files = parser.parse_args()
 
-def open_splat_file(key):
-    path = (opts.nonefile if v is None else str(v) for v in key)
-    path = os.path.join(*path)
+def open_makedirs(path):
     try:
-        fp = open(path, 'a')
+        return open(path, 'a')
     except IOError as err:
         if err.errno != errno.ENOENT: raise err
         if '/' not in path: raise err
         os.makedirs(os.path.dirname(path))
-        fp = open(path, 'a')
-    return fp
+        return open(path, 'a')
+
+def open_splat_file(key):
+    path = (opts.nonefile if v is None else str(v) for v in key)
+    path = os.path.join(*path)
+    return open_makedirs(path)
 
 try:
     ext = FlatCompoundExtractor(extractor.parse(spec)[0]
