@@ -56,7 +56,7 @@ if opts.verbose:
     paths = []
 
 fmt = '%s' + opts.output_separator
-with LRUFileCache(_opener=open_splat_file) as files:
+with LRUFileCache(open_splat_file) as files:
     for record in records:
         key = ext(record)
         fp = files.use(key)
