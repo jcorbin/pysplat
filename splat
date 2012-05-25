@@ -21,6 +21,42 @@ def open_makedirs(path):
         os.makedirs(os.path.dirname(path))
         return open(path, 'a')
 
+import io
+
+class RecordWriter(io.IOBase):
+    def __init__(self, buffer, output_separator):
+        self.buffer = buffer
+        self.output_separator = output_separator
+
+    @property
+    def name(self):
+        return self.buffer.name
+
+    @property
+    def closed(self):
+        return self.buffer.closed
+
+    def fileno(self):
+        self.buffer.fileno()
+
+    def flush(self):
+        self.buffer.flush()
+
+    def isatty(self):
+        self.buffer.isatty()
+
+    def readable(self):
+        return False
+
+    def writable(self):
+        return True
+
+    def write(self, record):
+        self.buffer.write(str(record) + self.output_separator)
+
+    def close(self):
+        self.buffer.close()
+
 class App(object):
     def __init__(self, args=None):
         self.opts, self.files = self.optparser.parse_args(args)
@@ -54,19 +90,18 @@ class SplatApp(App):
     def openkeyfile(self, key):
         path = os.path.sep.join(
             self.nonefile if v is None else str(v) for v in key)
-        return open_makedirs(path)
+        return RecordWriter(open_makedirs(path), self.output_separator)
 
     def __call__(self):
         if self.opts.verbose:
             counts = OrderedDict()
             paths = []
 
-        fmt = '%s' + self.output_separator
         with LRUFileCache(self.openkeyfile) as filecache:
             for record in self.records():
                 key = self.extractor(record)
                 fp = filecache.use(key)
-                fp.write(fmt % record)
+                fp.write(record)
                 if self.opts.verbose:
                     try:
                         counts[key] += 1
