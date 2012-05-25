@@ -21,16 +21,7 @@ def open_makedirs(path):
         os.makedirs(os.path.dirname(path))
         return open(path, 'a')
 
-class SplatApp(object):
-    optparser = OptionParser()
-    optparser.set_defaults(
-        output_separator='\n',
-        nonefile='__default__')
-    optparser.add_option('-v', '--verbose',
-        dest='verbose', action='store_true', default=True)
-    optparser.add_option('-x', '--extract',
-        dest='extract', action='append', default=[])
-
+class App(object):
     def __init__(self, args=None):
         self.opts, self.files = self.optparser.parse_args(args)
 
@@ -49,6 +40,16 @@ class SplatApp(object):
 
         for line in finput:
             yield line.rstrip('\r\n')
+
+class SplatApp(App):
+    optparser = OptionParser()
+    optparser.set_defaults(
+        output_separator='\n',
+        nonefile='__default__')
+    optparser.add_option('-v', '--verbose',
+        dest='verbose', action='store_true', default=True)
+    optparser.add_option('-x', '--extract',
+        dest='extract', action='append', default=[])
 
     def __call__(self):
         if self.opts.verbose:
