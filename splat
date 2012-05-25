@@ -52,10 +52,10 @@ if opts.verbose:
 
 fmt = '%s' + opts.output_separator
 with LRUFileCache(lambda key: open_makedirs(os.path.sep.join(
-    opts.nonefile if v is None else str(v) for v in key))) as files:
+    opts.nonefile if v is None else str(v) for v in key))) as filecache:
     for record in records:
         key = ext(record)
-        fp = files.use(key)
+        fp = filecache.use(key)
         fp.write(fmt % record)
         if opts.verbose:
             try:
