@@ -40,13 +40,13 @@ def get_nofile_avail():
     return n
 
 class LRUFileCache(LRUOrderedDict):
-    _custom_maxsize = False
+    has_custom_maxsize = False
     opener = lambda path: open(path, 'a')
 
     def __init__(self, _opener=None, _maxsize=None, *args, **kwds):
         if _maxsize is not None:
             self.maxsize = _maxsize
-            self._custom_maxsize = True
+            self.has_custom_maxsize = True
         if _opener is not None: self.opener = _opener
         super(LRUFileCache, self).__init__(*args, **kwds)
 
@@ -72,7 +72,7 @@ class LRUFileCache(LRUOrderedDict):
             fp.close()
 
     def __enter__(self):
-        if not self._custom_maxsize:
+        if not self.has_custom_maxsize:
             self._maxsize = get_nofile_avail()-1
         return self
 
