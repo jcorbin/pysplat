@@ -42,9 +42,10 @@ class App(object):
             yield line.rstrip('\r\n')
 
 class SplatApp(App):
+    output_separator = '\n'
+
     optparser = OptionParser()
     optparser.set_defaults(
-        output_separator='\n',
         nonefile='__default__')
     optparser.add_option('-v', '--verbose',
         dest='verbose', action='store_true', default=True)
@@ -56,7 +57,7 @@ class SplatApp(App):
             counts = OrderedDict()
             paths = []
 
-        fmt = '%s' + self.opts.output_separator
+        fmt = '%s' + self.output_separator
         with LRUFileCache(lambda key: open_makedirs(os.path.sep.join(
             self.opts.nonefile if v is None else str(v) for v in key))) as filecache:
             for record in self.records():
