@@ -43,10 +43,9 @@ class App(object):
 
 class SplatApp(App):
     output_separator = '\n'
+    nonefile = '__default__'
 
     optparser = OptionParser()
-    optparser.set_defaults(
-        nonefile='__default__')
     optparser.add_option('-v', '--verbose',
         dest='verbose', action='store_true', default=True)
     optparser.add_option('-x', '--extract',
@@ -59,7 +58,7 @@ class SplatApp(App):
 
         fmt = '%s' + self.output_separator
         with LRUFileCache(lambda key: open_makedirs(os.path.sep.join(
-            self.opts.nonefile if v is None else str(v) for v in key))) as filecache:
+            self.nonefile if v is None else str(v) for v in key))) as filecache:
             for record in self.records():
                 key = self.extractor(record)
                 fp = filecache.use(key)
