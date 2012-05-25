@@ -100,14 +100,13 @@ class SplatApp(App):
         with LRUFileCache(self.openkeyfile) as filecache:
             for record in self.records():
                 key = self.extractor(record)
-                fp = filecache.use(key)
-                fp.write(record)
+                filecache.use(key).write(record)
                 if self.opts.verbose:
                     try:
                         counts[key] += 1
                     except KeyError:
                         counts[key] = 1
-                        paths.append(fp.name)
+                        paths.append(filecache[key].name)
 
         if self.opts.verbose:
             counts = counts.values()
