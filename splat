@@ -12,6 +12,15 @@ import extractor
 from extractor.compound import FlatCompoundExtractor
 from lru import LRUFileCache
 
+def open_makedirs(path):
+    try:
+        return open(path, 'a')
+    except IOError as err:
+        if err.errno != errno.ENOENT: raise err
+        if '/' not in path: raise err
+        os.makedirs(os.path.dirname(path))
+        return open(path, 'a')
+
 optparser = OptionParser()
 optparser.set_defaults(
     output_separator='\n',
@@ -21,15 +30,6 @@ optparser.add_option('-v', '--verbose',
 optparser.add_option('-x', '--extract',
     dest='extract', action='append', default=[])
 opts, files = optparser.parse_args()
-
-def open_makedirs(path):
-    try:
-        return open(path, 'a')
-    except IOError as err:
-        if err.errno != errno.ENOENT: raise err
-        if '/' not in path: raise err
-        os.makedirs(os.path.dirname(path))
-        return open(path, 'a')
 
 def open_splat_file(key):
     path = (opts.nonefile if v is None else str(v) for v in key)
