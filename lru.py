@@ -1,8 +1,10 @@
 from collections import OrderedDict
 
 class LRUOrderedDict(OrderedDict):
-    def __init__(self, *args, **kwds):
-        self.maxsize = kwds.pop('_maxsize', 128)
+    maxsize = 128
+
+    def __init__(self, _maxsize=None, *args, **kwds):
+        if _maxsize is not None: self.maxsize = _maxsize
         super(LRUOrderedDict, self).__init__(*args, **kwds)
 
     def use(self, key, PREV=0, NEXT=1):
@@ -41,10 +43,9 @@ class LRUFileCache(LRUOrderedDict):
     _custom_maxsize = False
     opener = lambda path: open(path, 'a')
 
-    def __init__(self, _opener=None, *args, **kwds):
-        if '_maxsize' not in kwds:
-            kwds['_maxsize'] = get_nofile_avail()-1
-        else:
+    def __init__(self, _opener=None, _maxsize=None, *args, **kwds):
+        if _maxsize is not None:
+            self.maxsize = _maxsize
             self._custom_maxsize = True
         if _opener is not None: self.opener = _opener
         super(LRUFileCache, self).__init__(*args, **kwds)
