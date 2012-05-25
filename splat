@@ -51,14 +51,18 @@ class SplatApp(App):
     optparser.add_option('-x', '--extract',
         dest='extract', action='append', default=[])
 
+    def openkeyfile(self, key):
+        path = os.path.sep.join(
+            self.nonefile if v is None else str(v) for v in key)
+        return open_makedirs(path)
+
     def __call__(self):
         if self.opts.verbose:
             counts = OrderedDict()
             paths = []
 
         fmt = '%s' + self.output_separator
-        with LRUFileCache(lambda key: open_makedirs(os.path.sep.join(
-            self.nonefile if v is None else str(v) for v in key))) as filecache:
+        with LRUFileCache(self.openkeyfile) as filecache:
             for record in self.records():
                 key = self.extractor(record)
                 fp = filecache.use(key)
