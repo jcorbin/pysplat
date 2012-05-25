@@ -21,53 +21,60 @@ def open_makedirs(path):
         os.makedirs(os.path.dirname(path))
         return open(path, 'a')
 
-optparser = OptionParser()
-optparser.set_defaults(
-    output_separator='\n',
-    nonefile='__default__')
-optparser.add_option('-v', '--verbose',
-    dest='verbose', action='store_true', default=True)
-optparser.add_option('-x', '--extract',
-    dest='extract', action='append', default=[])
-opts, files = optparser.parse_args()
+class SplatApp(object):
+    optparser = OptionParser()
+    optparser.set_defaults(
+        output_separator='\n',
+        nonefile='__default__')
+    optparser.add_option('-v', '--verbose',
+        dest='verbose', action='store_true', default=True)
+    optparser.add_option('-x', '--extract',
+        dest='extract', action='append', default=[])
 
-try:
-    ext = FlatCompoundExtractor(extractor.parse(spec)[0]
-        for spec in opts.extract)
+    def __init__(self, args=None):
+        self.opts, self.files = self.optparser.parse_args(args)
 
-except ParseException as exc:
-    print >>sys.stderr, "Invalid extractor:", exc
-    print >>sys.stderr, exc.markInputline()
-    sys.exit(1)
+        try:
+            self.extractor = FlatCompoundExtractor(extractor.parse(spec)[0]
+                for spec in self.opts.extract)
 
-finput = fileinput.FileInput(
-    files=files,
-    openhook=fileinput.hook_compressed)
+        except ParseException as exc:
+            print >>sys.stderr, "Invalid extractor:", exc
+            print >>sys.stderr, exc.markInputline()
+            sys.exit(1)
 
-records = (line.rstrip('\r\n') for line in finput)
+    def records(self):
+        finput = fileinput.FileInput(files=self.files,
+            openhook=fileinput.hook_compressed)
 
-if opts.verbose:
-    counts = OrderedDict()
-    paths = []
+        for line in finput:
+            yield line.rstrip('\r\n')
 
-fmt = '%s' + opts.output_separator
-with LRUFileCache(lambda key: open_makedirs(os.path.sep.join(
-    opts.nonefile if v is None else str(v) for v in key))) as filecache:
-    for record in records:
-        key = ext(record)
-        fp = filecache.use(key)
-        fp.write(fmt % record)
-        if opts.verbose:
-            try:
-                counts[key] += 1
-            except KeyError:
-                counts[key] = 1
-                paths.append(fp.name)
+    def __call__(self):
+        if self.opts.verbose:
+            counts = OrderedDict()
+            paths = []
 
-if opts.verbose:
-    counts = counts.values()
-    fmt = '  %% %dd %%s' % len(str(max(counts)))
-    for count_path in zip(counts, paths):
-        print fmt % count_path
+        fmt = '%s' + self.opts.output_separator
+        with LRUFileCache(lambda key: open_makedirs(os.path.sep.join(
+            self.opts.nonefile if v is None else str(v) for v in key))) as filecache:
+            for record in self.records():
+                key = self.extractor(record)
+                fp = filecache.use(key)
+                fp.write(fmt % record)
+                if self.opts.verbose:
+                    try:
+                        counts[key] += 1
+                    except KeyError:
+                        counts[key] = 1
+                        paths.append(fp.name)
+
+        if self.opts.verbose:
+            counts = counts.values()
+            fmt = '  %% %dd %%s' % len(str(max(counts)))
+            for count_path in zip(counts, paths):
+                print fmt % count_path
+
+SplatApp()()
 
 # vim:set ft=python ts=4 sw=4 et:
