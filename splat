@@ -31,11 +31,6 @@ optparser.add_option('-x', '--extract',
     dest='extract', action='append', default=[])
 opts, files = optparser.parse_args()
 
-def open_splat_file(key):
-    path = (opts.nonefile if v is None else str(v) for v in key)
-    path = os.path.join(*path)
-    return open_makedirs(path)
-
 try:
     ext = FlatCompoundExtractor(extractor.parse(spec)[0]
         for spec in opts.extract)
@@ -56,7 +51,8 @@ if opts.verbose:
     paths = []
 
 fmt = '%s' + opts.output_separator
-with LRUFileCache(open_splat_file) as files:
+with LRUFileCache(lambda key: open_makedirs(os.path.sep.join(
+    opts.nonefile if v is None else str(v) for v in key))) as files:
     for record in records:
         key = ext(record)
         fp = files.use(key)
