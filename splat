@@ -12,15 +12,15 @@ import extractor
 from extractor.compound import FlatCompoundExtractor
 from lru import LRUFileCache
 
-parser = OptionParser()
-parser.set_defaults(
+optparser = OptionParser()
+optparser.set_defaults(
     output_separator='\n',
     nonefile='__default__')
-parser.add_option('-v', '--verbose',
+optparser.add_option('-v', '--verbose',
     dest='verbose', action='store_true', default=True)
-parser.add_option('-x', '--extract',
+optparser.add_option('-x', '--extract',
     dest='extract', action='append', default=[])
-opts, files = parser.parse_args()
+opts, files = optparser.parse_args()
 
 def open_makedirs(path):
     try:
