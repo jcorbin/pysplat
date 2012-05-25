@@ -58,6 +58,9 @@ class RecordWriter(io.IOBase):
         self.buffer.close()
 
 class App(object):
+    output_separator = '\n'
+    nonefile = '__default__'
+
     def __init__(self, args=None):
         self.opts, self.files = self.optparser.parse_args(args)
 
@@ -70,6 +73,11 @@ class App(object):
             print >>sys.stderr, exc.markInputline()
             sys.exit(1)
 
+    def openkeyfile(self, key):
+        path = os.path.sep.join(
+            self.nonefile if v is None else str(v) for v in key)
+        return RecordWriter(open_makedirs(path), self.output_separator)
+
     def records(self):
         finput = fileinput.FileInput(files=self.files,
             openhook=fileinput.hook_compressed)
@@ -78,19 +86,11 @@ class App(object):
             yield line.rstrip('\r\n')
 
 class SplatApp(App):
-    output_separator = '\n'
-    nonefile = '__default__'
-
     optparser = OptionParser()
     optparser.add_option('-v', '--verbose',
         dest='verbose', action='store_true', default=True)
     optparser.add_option('-x', '--extract',
         dest='extract', action='append', default=[])
-
-    def openkeyfile(self, key):
-        path = os.path.sep.join(
-            self.nonefile if v is None else str(v) for v in key)
-        return RecordWriter(open_makedirs(path), self.output_separator)
 
     def __call__(self):
         if self.opts.verbose:
