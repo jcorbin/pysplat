@@ -18,12 +18,15 @@ class SplatApp(app.App):
         self.extractor = self.opts.extract
 
     def __call__(self):
+        self.splat_records(self.records())
+
+    def splat_records(self, records):
         if self.opts.verbose:
             counts = OrderedDict()
             paths = []
 
         with LRUFileCache(self.openkeyfile) as filecache:
-            for record in self.records():
+            for record in records:
                 key = self.extractor(record)
                 filecache.use(key).write(record)
                 if self.opts.verbose:
