@@ -59,7 +59,6 @@ class RecordWriter(io.IOBase):
 
 class App(object):
     output_separator = '\n'
-    nonefile = '__default__'
 
     @property
     def extractor(self):
@@ -85,9 +84,8 @@ class App(object):
             sys.exit(1)
 
     def openkeyfile(self, key):
-        path = os.path.sep.join(
-            self.nonefile if v is None else str(v) for v in key)
-        return RecordWriter(open_makedirs(path), self.output_separator)
+        fp = open_makedirs(key.topath())
+        return RecordWriter(fp, self.output_separator)
 
     def records(self):
         finput = fileinput.FileInput(files=self.files,
