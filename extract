@@ -1,0 +1,44 @@
+#!/usr/bin/env pypy
+
+import os
+import sys
+from optparse import OptionParser
+
+import app
+
+class ExtractApp(app.App):
+    bakext = '.bak'
+
+    optparser = OptionParser()
+    optparser.add_option('-i', '--inplace',
+        dest='inplace', action='store_true', default=False)
+    optparser.add_option('-x', '--extract',
+        dest='extract', action='append', default=[])
+
+    def __init__(self, args=None):
+        self.opts, self.files = self.optparser.parse_args(args)
+        self.extractor = self.opts.extract
+        self.inplace = self.opts.inplace
+
+    def write_records(self, fp, records):
+        with app.RecordWriter(fp, self.output_separator) as w:
+            for record in records:
+                w.write(record)
+
+    def __call__(self):
+        if self.inplace and not self.files:
+            print >>sys.stderr, 'No files given, ignoring --inplace'
+            self.inplace = False
+        if self.inplace:
+            for ifp in self.input_files():
+                os.rename(ifp.name, ifp.name + self.bakext)
+                ofp = open(ifp.name, 'w')
+                self.write_records(ofp, (self.extractor(record)
+                    for record in self.parse_file_records(ifp)))
+        else:
+            self.write_records(sys.stdout, (self.extractor(record)
+                for record in self.records()))
+
+ExtractApp()()
+
+# vim:set ft=python ts=4 sw=4 et:
