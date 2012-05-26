@@ -3,6 +3,7 @@
 import os
 import sys
 from collections import OrderedDict
+from operator import itemgetter
 from optparse import OptionParser
 
 import app
@@ -57,7 +58,7 @@ class SplatApp(app.App):
         if self.opts.verbose:
             counts = counts.values()
             fmt = '  %% %dd %%s' % len(str(max(counts)))
-            for count_path in zip(counts, paths):
+            for count_path in sorted(zip(counts, paths), key=itemgetter(0)):
                 print fmt % count_path
 
 SplatApp()()
