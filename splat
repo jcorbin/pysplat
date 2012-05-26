@@ -61,10 +61,6 @@ class App(object):
     output_separator = '\n'
     nonefile = '__default__'
 
-    def __init__(self, args=None):
-        self.opts, self.files = self.optparser.parse_args(args)
-        self.extractor = self.opts.extract
-
     @property
     def extractor(self):
         try:
@@ -106,6 +102,10 @@ class SplatApp(App):
         dest='verbose', action='store_true', default=True)
     optparser.add_option('-x', '--extract',
         dest='extract', action='append', default=[])
+
+    def __init__(self, args=None):
+        self.opts, self.files = self.optparser.parse_args(args)
+        self.extractor = self.opts.extract
 
     def __call__(self):
         if self.opts.verbose:
