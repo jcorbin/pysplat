@@ -4,7 +4,7 @@ import errno
 import fileinput
 import os
 import sys
-from collections import OrderedDict
+from collections import OrderedDict, Sequence
 from optparse import OptionParser
 from pyparsing import ParseException
 
@@ -63,10 +63,25 @@ class App(object):
 
     def __init__(self, args=None):
         self.opts, self.files = self.optparser.parse_args(args)
+        self.extractor = self.opts.extract
 
+    @property
+    def extractor(self):
         try:
-            self.extractor = FlatCompoundExtractor(extractor.parse(spec)[0]
-                for spec in self.opts.extract)
+            return self._extractor
+        except AttributeError:
+            raise AttributeError('%r extractor not set'
+                % self.__class__.__name__)
+
+    @extractor.setter
+    def extractor(self, ext):
+        try:
+            if isinstance(ext, basestring):
+                ext = extractor.parse(ext)[0]
+            elif isinstance(ext, Sequence):
+                ext = FlatCompoundExtractor(extractor.parse(spec)[0]
+                    for spec in ext)
+            self._extractor = ext
 
         except ParseException as exc:
             print >>sys.stderr, "Invalid extractor:", exc
