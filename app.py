@@ -88,7 +88,8 @@ class App(object):
             sys.exit(1)
 
     def openkeyfile(self, key):
-        fp = open_makedirs(key.topath())
+        path = key.topath()
+        fp = open_makedirs(path)
         return RecordWriter(fp, self.output_separator)
 
     def open_input_file(self, filename):
