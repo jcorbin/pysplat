@@ -62,6 +62,7 @@ class DerpBZ2File(bz2.BZ2File):
             name, mode, buffering, compresslevel)
 
 class App(object):
+    keyfilebase = None
     output_separator = '\n'
 
     @property
@@ -89,6 +90,8 @@ class App(object):
 
     def openkeyfile(self, key):
         path = key.topath()
+        if self.keyfilebase:
+            path = os.path.join(self.keyfilebase, path)
         fp = open_makedirs(path)
         return RecordWriter(fp, self.output_separator)
 
