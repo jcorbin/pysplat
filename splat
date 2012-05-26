@@ -16,6 +16,8 @@ class SplatApp(app.App):
     optparser.set_defaults(verbose=False)
     optparser.add_option('-v', '--verbose',
         dest='verbose', action='store_true')
+    optparser.add_option('-q', '--quiet',
+        dest='verbose', action='store_false')
     optparser.add_option('-i', '--inplace',
         dest='inplace', action='store_true', default=False)
     optparser.add_option('-x', '--extract',
