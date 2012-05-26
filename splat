@@ -13,8 +13,9 @@ class SplatApp(app.App):
     bakext = '.bak'
 
     optparser = OptionParser()
+    optparser.set_defaults(verbose=False)
     optparser.add_option('-v', '--verbose',
-        dest='verbose', action='store_true', default=False)
+        dest='verbose', action='store_true')
     optparser.add_option('-i', '--inplace',
         dest='inplace', action='store_true', default=False)
     optparser.add_option('-x', '--extract',
