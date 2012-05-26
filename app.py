@@ -109,7 +109,11 @@ class App(object):
                 yield self.open_input_file(path)
             del self.filename
 
+    def parse_file_records(self, fp):
+        for line in fp:
+            yield line.rstrip('\r\n')
+
     def records(self):
         for fp in self.input_files():
-            for line in fp:
-                yield line.rstrip('\r\n')
+            for record in self.parse_file_records(fp):
+                yield record
