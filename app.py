@@ -1,5 +1,4 @@
 import errno
-import fileinput
 import io
 import os
 import sys
@@ -53,6 +52,9 @@ class RecordWriter(io.IOBase):
 import extractor
 from extractor.compound import FlatCompoundExtractor
 
+import gzip
+import bz2
+
 class App(object):
     output_separator = '\n'
 
@@ -84,7 +86,13 @@ class App(object):
         return RecordWriter(fp, self.output_separator)
 
     def open_input_file(self, filename):
-        return fileinput.hook_compressed(filename, 'r')
+        ext = os.path.splitext(filename)[1]
+        if ext == '.gz':
+            return gzip.GzipFile(filename, 'r')
+        elif ext == '.bz2':
+            return BZ2File(filename, 'r')
+        else:
+            return open(filename, 'r')
 
     def input_files(self):
         if not self.files:
