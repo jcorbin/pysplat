@@ -83,13 +83,16 @@ class App(object):
         fp = open_makedirs(key.topath())
         return RecordWriter(fp, self.output_separator)
 
+    def open_input_file(self, filename):
+        return fileinput.hook_compressed(filename, 'r')
+
     def input_files(self):
         if not self.files:
             yield sys.stdin
         else:
             for path in self.files:
                 self.filename = path
-                yield fileinput.hook_compressed(path, 'r')
+                yield self.open_input_file(path)
             del self.filename
 
     def records(self):
