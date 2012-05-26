@@ -8,7 +8,7 @@ class strtuple(tuple):
             if part is None:
                 yield StrTupleNonePath
             else:
-                yield str(part)
+                yield str(part).replace(os.path.sep, '_')
 
     def topath(self):
         return os.path.sep.join(self.path_components())
