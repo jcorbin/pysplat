@@ -55,6 +55,12 @@ from extractor.compound import FlatCompoundExtractor
 import gzip
 import bz2
 
+class DerpBZ2File(bz2.BZ2File):
+    def __init__(self, name, mode='r', buffering=0, compresslevel=9):
+        self.name = name
+        super(DerpBZ2File, self).__init__(
+            name, mode, buffering, compresslevel)
+
 class App(object):
     output_separator = '\n'
 
@@ -90,7 +96,7 @@ class App(object):
         if ext == '.gz':
             return gzip.GzipFile(filename, 'r')
         elif ext == '.bz2':
-            return BZ2File(filename, 'r')
+            return DerpBZ2File(filename, 'r')
         else:
             return open(filename, 'r')
 
