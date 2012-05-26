@@ -1,5 +1,7 @@
 #!/usr/bin/env pypy
 
+import os
+import sys
 from collections import OrderedDict
 from optparse import OptionParser
 
@@ -7,18 +9,34 @@ import app
 from lru import LRUFileCache
 
 class SplatApp(app.App):
+    bakext = '.bak'
+
     optparser = OptionParser()
     optparser.add_option('-v', '--verbose',
         dest='verbose', action='store_true', default=True)
+    optparser.add_option('-i', '--inplace',
+        dest='inplace', action='store_true', default=False)
     optparser.add_option('-x', '--extract',
         dest='extract', action='append', default=[])
 
     def __init__(self, args=None):
         self.opts, self.files = self.optparser.parse_args(args)
         self.extractor = self.opts.extract
+        self.inplace = self.opts.inplace
 
     def __call__(self):
-        self.splat_records(self.records())
+        if self.inplace and not self.files:
+            print >>sys.stderr, 'No files given, ignoring --inplace'
+            self.inplace = False
+        if self.inplace:
+            for fp in self.input_files():
+                os.rename(fp.name, fp.name + self.bakext)
+                os.mkdir(fp.name)
+                self.keyfilebase = fp.name
+                self.splat_records(self.parse_file_records(fp))
+                del self.keyfilebase
+        else:
+            self.splat_records(self.records())
 
     def splat_records(self, records):
         if self.opts.verbose:
