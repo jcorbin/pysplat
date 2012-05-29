@@ -17,4 +17,7 @@ class ExtractorPipe(object):
         return s
 
     parse_expression = delimitedList(ExtractorTerm, delim='|')
-    parse_expression.setParseAction(lambda toks: ExtractorPipe(toks))
+
+    @parse_expression.setParseAction
+    def parse_expression(toks):
+        return ExtractorPipe(toks)
