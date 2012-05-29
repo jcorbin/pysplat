@@ -20,4 +20,4 @@ class ExtractorPipe(object):
 
     @parse_expression.setParseAction
     def parse_expression(toks):
-        return ExtractorPipe(toks)
+        return toks[0] if len(toks) == 1 else ExtractorPipe(toks)
