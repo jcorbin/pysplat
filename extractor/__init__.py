@@ -1,12 +1,5 @@
-from regex import RegexExtractor
-from field import FieldExtractor
 from pyparsing import *
-
-pylambda = Combine(
-    'lambda' + White(' ') +
-    Word(alphas, alphanums) + ':' +
-    CharsNotIn('|'))
-pylambda.setParseAction(lambda toks: eval(toks[0]))
+from term import ExtractorTerm
 
 class ExtractorPipe(object):
     def __init__(self, extractors):
@@ -23,11 +16,7 @@ class ExtractorPipe(object):
             if s is None: return None
         return s
 
-    parse_expression = delimitedList(
-        pylambda |
-        FieldExtractor.parse_expression |
-        RegexExtractor.parse_expression,
-        delim='|')
+    parse_expression = delimitedList(ExtractorTerm, delim='|')
     parse_expression.setParseAction(lambda toks: ExtractorPipe(toks))
 
 def parse(string):
