@@ -49,6 +49,7 @@ class RecordWriter(io.IOBase):
         self.buffer.close()
 
 import extractor
+import extractor.common
 from extractor.compound import CompoundExtractor
 
 import gzip
@@ -83,7 +84,12 @@ class App(object):
             sys.exit(1)
 
     def openkeyfile(self, key):
-        path = key.topath()
+        if isinstance(key, extractor.common.strtuple):
+            path = key.topath()
+        elif key is None:
+            path = extractor.common.StrTupleNonePath
+        else:
+            path = str(key).replace('/', '_')
         if self.keyfilebase:
             path = os.path.join(self.keyfilebase, path)
         fp = open_makedirs(path)
