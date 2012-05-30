@@ -3,7 +3,6 @@ import io
 import os
 import sys
 
-from collections import Sequence
 from pyparsing import ParseException
 
 def open_makedirs(path):
@@ -76,12 +75,7 @@ class App(object):
     @extractor.setter
     def extractor(self, ext):
         try:
-            if isinstance(ext, basestring):
-                ext = extractor.parse(ext)[0]
-            elif isinstance(ext, Sequence):
-                ext = CompoundExtractor(extractor.parse(spec)[0]
-                    for spec in ext)
-            self._extractor = ext
+            self._extractor = extractor.parse(ext)[0]
 
         except ParseException as exc:
             print >>sys.stderr, "Invalid extractor:", exc
