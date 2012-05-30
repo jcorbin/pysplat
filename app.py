@@ -50,7 +50,7 @@ class RecordWriter(io.IOBase):
         self.buffer.close()
 
 import extractor
-from extractor.compound import FlatCompoundExtractor
+from extractor.compound import CompoundExtractor
 
 import gzip
 import bz2
@@ -79,7 +79,7 @@ class App(object):
             if isinstance(ext, basestring):
                 ext = extractor.parse(ext)[0]
             elif isinstance(ext, Sequence):
-                ext = FlatCompoundExtractor(extractor.parse(spec)[0]
+                ext = CompoundExtractor(extractor.parse(spec)[0]
                     for spec in ext)
             self._extractor = ext
 
