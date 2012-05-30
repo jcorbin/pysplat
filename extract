@@ -39,6 +39,11 @@ class ExtractApp(app.App):
             self.write_records(sys.stdout, (self.extractor(record)
                 for record in self.records()))
 
-ExtractApp()()
+import errno
+try:
+    ExtractApp()()
+except IOError as err:
+    if err.errno != errno.EPIPE:
+        raise err
 
 # vim:set ft=python ts=4 sw=4 et:
