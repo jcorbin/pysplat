@@ -12,12 +12,13 @@ class ExtractApp(app.App):
     optparser = OptionParser()
     optparser.add_option('-i', '--inplace',
         dest='inplace', action='store_true', default=False)
-    optparser.add_option('-x', '--extract',
-        dest='extract', action='append', default=[])
 
     def __init__(self, args=None):
-        self.opts, self.files = self.optparser.parse_args(args)
-        self.extractor = self.opts.extract
+        self.opts, args = self.optparser.parse_args(args)
+        if not len(args):
+            self.optparser.error('no extrator given')
+        self.extractor = args[0]
+        self.files = args[1:]
         self.inplace = self.opts.inplace
 
     def write_records(self, fp, records):
