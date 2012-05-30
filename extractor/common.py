@@ -14,4 +14,4 @@ class strtuple(tuple):
         return os.path.sep.join(self.path_components())
 
     def __str__(self):
-        return ' '.join('' if term is None else term for term in self)
+        return ' '.join('' if term is None else str(term) for term in self)
